@@ -4,17 +4,12 @@ language: rust
 # Cache cargo symbols for faster build
 cache: cargo
 
-# Dependencies of kcov, used by coverage
+# tarpaulin has only been tested on bionic and trusty other distros may have issues
+dist: bionic 
 addons:
   apt:
     packages:
-      - libcurl4-openssl-dev
-      - libelf-dev
-      - libdw-dev
-      - binutils-dev
-      - cmake # also required for cargo-update
-    sources:
-      - kalakris-cmake
+      - libssl-dev
 
 # run builds for all the trains (and more)
 rust:
@@ -27,10 +22,9 @@ rust:
 
 before_script:
   - export PATH=$HOME/.cargo/bin:$PATH
-  - cargo install cargo-update || echo "cargo-update already installed"
-# Workaround for https://github.com/roblabla/cargo-travis/issues/66
-#  - cargo install cargo-travis || echo "cargo-travis already installed"
-  - cargo install --git https://github.com/roblabla/cargo-travis --branch cargo-metadata || echo "cargo-travis already installed"
+  - if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
+      cargo install cargo-tarpaulin
+    fi
   - cargo install-update -a # update outdated cached binaries
 
 # the main build
@@ -41,9 +35,12 @@ script:
       cargo bench &&
       cargo doc
 
-after_success:
-# measure code coverage and upload to coveralls.io
-  - cargo coveralls
-#  - cargo coverage --verbose && bash <(curl -s https://codecov.io/bash) -s target/kcov
-# upload documentation to github.io (gh-pages branch)
-#  - cargo doc-upload
+after_success: |
+  if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
+    # Uncomment the following line for coveralls.io
+    # cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
+
+    # Uncomment the following two lines create and upload a report for codecov.io
+    cargo tarpaulin --out Xml
+    bash <(curl -s https://codecov.io/bash)
+  fi
