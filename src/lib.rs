@@ -32,7 +32,7 @@ impl Bundler {
 	
 	fn bundle_package(&mut self, pkg: &PackageId, metadata: &Metadata, root: bool) {
 		eprintln!("Bundling {}", pkg);
-		let node = metadata.resolve.as_ref().unwrap().nodes.iter().find(|n| n.id == *pkg).expect(&format!("package {} not found in resolve", pkg));
+		let node = metadata.resolve.as_ref().unwrap().nodes.iter().find(|n| n.id == *pkg).unwrap_or_else(|| panic!("package {} not found in resolve", pkg));
 		for dep in &node.deps {
 			if Self::is_builtin(dep) {
 				continue;
@@ -63,7 +63,7 @@ impl Bundler {
 	fn process_source(&mut self, src: &PathBuf) {
 		eprintln!("{:?}", src);
 		let code = read_file(&Path::new(src));
-		let mut file = syn::parse_file(&code).expect(&format!("failed to parse {:?}", src));
+		let mut file = syn::parse_file(&code).unwrap_or_else(|e| panic!("failed to parse {:?}: {}", src, e));
 
 		let base_path = Path::new(src).parent().expect("lib.src_path has no parent").to_path_buf();
 
@@ -83,8 +83,8 @@ fn process_include_str(source: TokenStream, base_path: &PathBuf) -> TokenStream 
 	let mut source = source.into_iter();
 	while let Some(token) = source.next() {
 		use proc_macro2::TokenTree::*;
-		match token {
-			Ident(ref i) => if i.to_string() == "include_str" {
+		match &token {
+			Ident(i) => if i == "include_str" {
 				let next = source.next();
 				if let Some(Punct(_)) = next {
 					// include_str!
@@ -94,7 +94,7 @@ fn process_include_str(source: TokenStream, base_path: &PathBuf) -> TokenStream 
 						//FIXME
 						let filename = filename.to_string().trim_matches('"').to_string();
 						let path = base_path.join(&filename);
-						let contents = std::fs::read_to_string(&path).expect(&format!("Included file {:?} not found", path));
+						let contents = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("Included file {:?} not found: {}", path, e));
 						eprintln!("Processing {} {} => {:?}", i, filename, contents);
 						tokens.push(Literal(proc_macro2::Literal::string(&contents)));
 						continue;
@@ -139,16 +139,16 @@ impl VisitMut for Expander {
 		}
 	}
 
+	/* This works, but I don't see how to replace it with the contents. Probably not the right approach.
 	fn visit_expr_macro_mut(&mut self, item: &mut syn::ExprMacro) {
-		/* This works, but I don't see how to replace it with the contents. Probably not the right approach.
 		if item.mac.path.is_ident("include_str") {
 			let filename = item.mac.tts.to_string().trim_matches('"').to_string();
 			let path = self.base_path.join(&filename);
 			let contents = std::fs::read_to_string(&path).expect(&format!("Included file {:?} not found", path));
 			eprintln!("Including {} as {:?}", filename, contents);
 		}
-		*/
 	}
+	*/
 }
 
 impl Expander {
@@ -161,7 +161,7 @@ impl Expander {
 			}
 			return;
 		}
-		let other_base_path = self.base_path.join(&name).to_path_buf();
+		let other_base_path = self.base_path.join(&name);
 		let (base_path, code) = vec![
 			(self.base_path.clone(), format!("{}.rs", name)),
 			(other_base_path, String::from("mod.rs")),
@@ -183,6 +183,6 @@ impl Expander {
 fn read_file(path: &Path) -> String {
 	let mut buf = String::new();
 	use std::io::Read;
-	File::open(path).expect(&format!("failed to open {:?}", path)).read_to_string(&mut buf).expect(&format!("failed to read {:?}", path));
+	File::open(path).unwrap_or_else(|e| panic!("failed to open {:?}: {}", path, e)).read_to_string(&mut buf).unwrap_or_else(|e| panic!("failed to read {:?}: {}", path, e));
 	buf
 }
