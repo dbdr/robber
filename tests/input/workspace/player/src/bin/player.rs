@@ -1,3 +1,3 @@
 fn main() {
-    println!("Hello, {}!", model::message());
+    println!("Hello, {}!\n42", model::message());
 }

@@ -4,6 +4,8 @@ use std::path::{Path, PathBuf};
 use std::collections::HashSet;
 use proc_macro2::TokenStream;
 
+mod optimizer;
+
 pub fn bundle<P: AsRef<Path>>(crate_dir: P) -> String {
 	let manifest = crate_dir.as_ref().join("Cargo.toml");
 	let mut cmd = MetadataCommand::new();
@@ -71,6 +73,8 @@ impl Bundler {
 			base_path: base_path.clone(),
 		}.visit_file_mut(&mut file);
 
+		optimizer::optimize(&mut file);
+		
 		let tokens = process_include_str(file.into_token_stream(), &base_path);
 
 		use quote::ToTokens;

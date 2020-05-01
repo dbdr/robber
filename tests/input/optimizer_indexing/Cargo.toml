@@ -1,0 +1,7 @@
+[package]
+name = "optimizer_indexing"
+version = "0.1.0"
+authors = ["dbdr <dbdr@codingame.com>"]
+edition = "2018"
+
+[dependencies]

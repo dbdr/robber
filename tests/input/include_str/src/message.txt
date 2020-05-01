@@ -1,1 +1,2 @@
-CodinGame
+CodinGame!
+42

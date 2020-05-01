@@ -1,5 +1,5 @@
 use bin_and_lib::*;
 
 fn main() {
-    println!("Hello, {}!", message());
+    println!("Hello, {}!\n42", message());
 }

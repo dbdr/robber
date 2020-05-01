@@ -1,3 +1,3 @@
 fn main() {
-    println!("Hello, CodinGame!");
+    println!("Hello, CodinGame!\n42");
 }

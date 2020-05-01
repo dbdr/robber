@@ -21,8 +21,10 @@ fn bundle() -> Result<(), Box<dyn std::error::Error>> {
 		}
 		
 		let bot_output = Command::new(&compiled_bot).output()?;
-		assert!(bot_output.status.success());
-		assert_eq!("Hello, CodinGame!\n", String::from_utf8(bot_output.stdout)?);
+		if ! bot_output.status.success() {
+			panic!("Bot {:?} crashed:\n{}", bot, String::from_utf8(bot_output.stderr)?);
+		}
+		assert_eq!("Hello, CodinGame!\n42\n", String::from_utf8(bot_output.stdout)?);
 		std::fs::remove_file(compiled_bot)?;
 	}
 	Ok(())
