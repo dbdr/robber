@@ -1,0 +1,11 @@
+[package]
+name = "robber"
+version = "0.1.0"
+authors = ["dbdr <dbdr@codingame.com>"]
+edition = "2018"
+
+[dependencies]
+cargo_metadata = "0.8"
+quote = "0.6"
+syn = { version = "0.15", features = ["full", "visit-mut"] }
+proc-macro2 = "0.4.30"

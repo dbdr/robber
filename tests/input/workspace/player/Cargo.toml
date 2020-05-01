@@ -1,0 +1,8 @@
+[package]
+name = "player"
+version = "0.1.0"
+authors = ["dbdr <dbdr@codingame.com>"]
+edition = "2018"
+
+[dependencies]
+model = { path = "../model" }
