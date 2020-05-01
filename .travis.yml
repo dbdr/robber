@@ -43,8 +43,7 @@ script:
 
 after_success:
 # measure code coverage and upload to coveralls.io
-#  - cargo coveralls
-  - cargo coverage --verbose
-  - bash <(curl -s https://codecov.io/bash) -s target/kcov
+  - cargo coveralls
+#  - cargo coverage --verbose && bash <(curl -s https://codecov.io/bash) -s target/kcov
 # upload documentation to github.io (gh-pages branch)
 #  - cargo doc-upload
