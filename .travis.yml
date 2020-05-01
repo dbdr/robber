@@ -22,7 +22,7 @@ rust:
 
 before_script:
   - export PATH=$HOME/.cargo/bin:$PATH
-  - [[ "$TRAVIS_RUST_VERSION" == stable ]] && cargo install cargo-tarpaulin
+  - if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then cargo install cargo-tarpaulin; fi
   - cargo install-update -a # update outdated cached binaries
 
 # the main build
