@@ -3,13 +3,16 @@ fn bundle() -> Result<(), Box<dyn std::error::Error>> {
 	use std::fs::*;
 	use std::process::Command;
 	
+	let output_dir = "./target/bundled";
+	std::fs::create_dir_all(&output_dir)?;
+	
 	for bot in read_dir("tests/input")? {
 		let bot = bot?.path();
 		let bot_name = bot.file_name().unwrap().to_str().unwrap();
 		eprintln!("\n\n### {:?}", bot);
 		let source = robber::bundle(&bot);
-		let source_file  = format!("generated/{}_bot.rs", bot_name);
-		let compiled_bot = format!("generated/{}_bot", bot_name);
+		let source_file  = format!("{}/{}_bot.rs", output_dir, bot_name);
+		let compiled_bot = format!("{}/{}_bot", output_dir, bot_name);
 		std::fs::write(&source_file, source)?;
 		
 		let rustc_output = Command::new("rustc").args(&[&source_file, "-o", &compiled_bot]).output()?;
