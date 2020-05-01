@@ -1,5 +1,8 @@
 # Robber, the Rust Optimizing Bot Bundler
 
+[![Build status](https://travis-ci.org/dbdr/robber.svg?branch=master)](https://travis-ci.org/dbdr/robber)
+[![Coverage report](https://codecov.io/gh/dbdr/robber/branch/master/graph/badge.svg)](https://codecov.io/gh/dbdr/robber)
+
 Robber is a source code bundler for [Rust]. It parses a main file, recursively collects all other required local source files, and bundles them together in a single source file.
 The main motivation is to submit Rust code for [CodinGame] competitions, and could be useful for other situations where a codebase has to be bundled into a single file.
 
