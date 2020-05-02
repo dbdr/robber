@@ -10,7 +10,7 @@ The main motivation is to submit Rust code for [CodinGame] competitions, and cou
 
   - Supports workspaces and local crates
   - Uses a Rust parser, so any valid Rust code should be accepted regardless of formatting
-  - Compacts the code to save space, for instance by not including test code (WIP)
+  - Compacts the code to save space (c.f. 100K character limit on [CodinGame]), for instance by not including unit test code
   - Supports `include_str!` for inlining data from a file into your code ([doc](https://doc.rust-lang.org/std/macro.include_str.html))
   - Optionally rewrites some patterns in your code into more efficient forms
 
@@ -31,7 +31,7 @@ The idea is to implement a [source-level optimizer](src/optimizer.rs) that will 
 You should be aware that:
 
  - These optimizations will go around some of the usual checking done in debug mode. You should be confident in your bot correctness before using them.
- - The optimizer might be incorrect. In the best case the generated code might simply not compile and it will be obvious. In the worse case, it will
+ - The optimizer might be incorrect. In the best case, the generated code might simply not compile and it will be obvious. In the worse case, it will
    introduce a bug that was not in your code!
  - The generated code will be harder to read. However, normally you don't really need to read it, just work on your source. You do store it in git for history
    anyways, right? ;)
@@ -41,10 +41,11 @@ For these reasons, the optimizations are not enabled by default (liar! actually 
 ### List of optimizations:
 
  - [x] Remove bound checks in array accesses (only implemented for lvalues for now).
-   This *will* crash your bot or make it behave strange if your indices are out of bounds.
-   This is similar to what C and C++ do, and both faster and more dangerous than Rust even release mode (unless you use explicit unchecked access).
+   This *will* crash your bot or make it behave strangely if your indices are out of bounds.
+   This is similar to what C and C++ do, and both faster and more dangerous than Rust even in release mode (unless you use explicit unchecked access).
  - [ ] Avoid the overflow checks in arithmetic operations. This might be impossible to do completely until [this issue](https://github.com/rust-lang/rust/issues/71768)
    is fixed in the Rust standard library (I'm working on it) and [CodinGame] upgrades their version of rustc.
+ - [ ] Strip out debug assertions and non-debug assertions.
  - [ ] TODO: identify more cases and implement them.
 
 These optimizations can't reasonably remove all sources of slowness from debug mode, in particular since they cannot affect the standard library, but they should help.
@@ -52,8 +53,9 @@ And there is potential to enable optimizations even useful in release mode, like
 
 ## TODOs
 
-  - Perform source-level optimizations to help work around the compilation in debug mode on [CodinGame]
-  - Save more space, for instance by removing indentation, as an option
+ - Provide an option for formatting, to either produce the most compact (but hard to read) code,
+   or to format it as nicely as possible (probably using cargo fmt).
+ - Strip out attributes irrelevant for execution, like #[allow] and #[doc] generated from /// comments.
 
 
 ## Installation and usage
