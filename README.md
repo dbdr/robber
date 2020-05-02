@@ -27,7 +27,7 @@ times out in the IDE, making it harder for you and others to test your bot.
 I've measured my implementation of [Floyd–Warshall] for [Ocean of Code] to perform 40 times slower in debug mode than in release mode
 (this is an extreme case, with N³ iterations of the inner loop with plenty of missed optimizations).
 
-The idea is to implement a [source-level optimizer](src/lib/optimizer.rs) that will rewrite your code into a version that will perform better, even in debug mode.
+The idea is to implement a [source-level optimizer](src/optimizer.rs) that will rewrite your code into a version that will perform better, even in debug mode.
 You should be aware that:
 
  - These optimizations will go around some of the usual checking done in debug mode. You should be confident in your bot correctness before using them.
@@ -80,7 +80,7 @@ Robber includes [various minimalistic projects layout examples](tests/input/) an
   - that rustc successfully compiles the bundled versions, and
   - that the compiled programs work as expected.
 
-If your find that Robber does not work on your code, feel free to open an [issue](issues).
+If your find that Robber does not work on your code, feel free to open an [issue](../../issues).
 If you are able to submit a pull request with an example layout that fails (or with a fix!), that will be much appreciated.
 
 ## License
