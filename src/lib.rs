@@ -13,7 +13,8 @@ pub fn bundle<P: AsRef<Path>>(crate_dir: P) -> String {
 	let metadata = cmd.exec().unwrap();
 	//eprintln!("{:#?}", metadata);
 	let root = metadata.resolve.as_ref().expect("dependency resolution failed").root.as_ref().unwrap_or(
-		&metadata.packages.iter().find(|p| p.targets.iter().any(|t| t.kind.iter().any(|k| k == "bin"))).expect("bin package not found").id);
+		&metadata.packages.iter().find(|p| metadata.workspace_members.contains(&p.id) && p.targets.iter().any(|t| t.kind.iter().any(|k| k == "bin"))).
+			expect("bin package not found").id);
 	let mut bundler = Bundler::new();
 	bundler.bundle_package(root, &metadata, true);
 	bundler.output
