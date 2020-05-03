@@ -37,6 +37,9 @@ impl Bundler {
 		eprintln!("Bundling {}", pkg);
 		let node = metadata.resolve.as_ref().unwrap().nodes.iter().find(|n| n.id == *pkg).unwrap_or_else(|| panic!("package {} not found in resolve", pkg));
 		for dep in &node.deps {
+			if ! dep.dep_kinds.iter().any(|ki| ki.kind == DependencyKind::Normal) {
+				continue;
+			}
 			if Self::is_builtin(dep) {
 				continue;
 			}
