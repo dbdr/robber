@@ -4,6 +4,7 @@ use syn::visit_mut::VisitMut;
 pub fn optimize(file: &mut File) {
 	let mut opt = Optimizer {
 		bound_checks_removed: 0,
+		debug_asserts_removed: 0,
 	};
 	opt.visit_file_mut(file);
 	eprintln!("{:#?}", opt);
@@ -12,9 +13,17 @@ pub fn optimize(file: &mut File) {
 #[derive(Debug)]
 struct Optimizer {
 	bound_checks_removed: u64,
+	debug_asserts_removed: u64,
 }
 
 impl VisitMut for Optimizer {
+	fn visit_block_mut(&mut self, i: &mut Block) {
+		i.stmts.retain(|s| !self.filter_out_stmt(s));
+		for it in &mut i.stmts {
+		   self.visit_stmt_mut(it)
+		}
+	}
+
 	fn visit_expr_assign_mut(&mut self, e: &mut ExprAssign) {
 		self.optimize_lvalue(&mut e.left, true);
 	}
@@ -25,6 +34,32 @@ impl VisitMut for Optimizer {
 }
 
 impl Optimizer {
+	fn is_debug_assert(&mut self, path: &syn::Path) -> bool {
+		if path.is_ident("debug_assert") || path.is_ident("debug_assert_eq") {
+			self.debug_asserts_removed += 1;
+			true
+		} else {
+			false
+		}
+	}
+	
+	fn filter_out_stmt(&mut self, s: &Stmt) -> bool {
+		match s {
+			Stmt::Expr(Expr::Macro(mac)) => {
+				if self.is_debug_assert(&mac.mac.path) {
+					return true;
+				}
+			}
+			Stmt::Semi(Expr::Macro(mac), _) => {
+				if self.is_debug_assert(&mac.mac.path) {
+					return true;
+				}
+			}
+			_ => {}
+		}
+		false
+	}
+	
 	fn optimize_lvalue(&mut self, e: &mut Expr, outer: bool) {
 		match e {
 			// Replace slice indexing with get_unchecked_mut
