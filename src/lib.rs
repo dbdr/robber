@@ -38,7 +38,11 @@ impl Bundler {
 		let node = metadata.resolve.as_ref().unwrap().nodes.iter().find(|n| n.id == *pkg).unwrap_or_else(|| panic!("package {} not found in resolve", pkg));
 		for dep in &node.deps {
 			if ! dep.dep_kinds.iter().any(|ki| ki.kind == DependencyKind::Normal) {
-				continue;
+				// dep_kinds was added in Rust 1.41, it is empty before that.
+				// TODO: Remove this test when we stop supporting 1.41
+				if ! dep.dep_kinds.is_empty() { 
+					continue;
+				}
 			}
 			if Self::is_builtin(dep) {
 				continue;
