@@ -3,6 +3,7 @@ use syn::visit_mut::VisitMut;
 
 pub fn optimize(file: &mut File) {
 	let mut opt = Optimizer {
+		attributes_removed: 0,
 		bound_checks_removed: 0,
 		debug_asserts_removed: 0,
 	};
@@ -12,6 +13,7 @@ pub fn optimize(file: &mut File) {
 
 #[derive(Debug)]
 struct Optimizer {
+	attributes_removed: u64,
 	bound_checks_removed: u64,
 	debug_asserts_removed: u64,
 }
@@ -30,6 +32,19 @@ impl VisitMut for Optimizer {
 
 	fn visit_expr_assign_op_mut(&mut self, e: &mut ExprAssignOp) {
 		self.optimize_lvalue(&mut e.left, true);
+	}
+
+	fn visit_file_mut(&mut self, f: &mut File) {
+		f.attrs.retain(|a| self.retain_attribute(&a));
+		
+		for i in &mut f.items {
+			self.visit_item_mut(i);
+		}
+	}
+
+	fn visit_item_fn_mut(&mut self, fun: &mut ItemFn) {
+		fun.attrs.retain(|a| self.retain_attribute(&a));
+		self.visit_block_mut(&mut fun.block);
 	}
 }
 
@@ -118,4 +133,13 @@ impl Optimizer {
 			_ => {}
 		}
 	}
+	
+	fn retain_attribute(&mut self, a: &Attribute) -> bool {
+		if a.path.is_ident("doc") || a.path.is_ident("allow") {
+			self.attributes_removed += 1;
+			return false;
+		}
+		
+		true
+	}	
 }

@@ -13,7 +13,9 @@ fn bundle() -> Result<(), Box<dyn std::error::Error>> {
 		let source = robber::bundle(&bot);
 		let source_file  = format!("{}/{}_bot.rs", output_dir, bot_name);
 		let compiled_bot = format!("{}/{}_bot", output_dir, bot_name);
-		std::fs::write(&source_file, source)?;
+		std::fs::write(&source_file, &source)?;
+		
+		assert!(! source.contains("irrelevant_text"), "Irrelevant text (comment, linting attribute, ...) made its way into the bundled version");
 		
 		let rustc_output = Command::new("rustc").args(&[&source_file, "-o", &compiled_bot]).output()?;
 		if ! rustc_output.status.success() {

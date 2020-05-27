@@ -10,7 +10,10 @@ The main motivation is to submit Rust code for [CodinGame] competitions, and cou
 
   - Supports workspaces and local crates
   - Uses a Rust parser, so any valid Rust code should be accepted regardless of formatting
-  - Compacts the code to save space (c.f. 100K character limit on [CodinGame]), for instance by not including unit test code
+  - Compacts the code to save space (c.f. 100K character limit on [CodinGame]), for instance by not including:
+    - comments
+    - unit test code
+    - linting attributes such as `#[allow(...)]`
   - Supports `include_str!` for inlining data from a file into your code ([doc](https://doc.rust-lang.org/std/macro.include_str.html))
   - Optionally rewrites some patterns in your code into more efficient forms
 
@@ -55,7 +58,6 @@ And there is potential to enable optimizations even useful in release mode, like
 
  - Provide an option for formatting, to either produce the most compact (but hard to read) code,
    or to format it as nicely as possible (probably using cargo fmt).
- - Strip out attributes irrelevant for execution, like #[allow] and #[doc] generated from /// comments.
 
 
 ## Installation and usage
